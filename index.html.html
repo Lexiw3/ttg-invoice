@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ThreeTrader Invoice</title>
+<style>
+  :root{
+    --navy:#1a3362;
+    --navy2:#1e4080;
+    --teal:#2ec4d6;
+    --yellow:#fff700;
+    --muted:#4a6080;
+    --lightline:#e2e8f0;
+    --lightblue:#8aafd4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#eef1f5;
+    margin:0;
+    padding:24px 0 60px;
+    color:#111;
+  }
+  .toolbar{
+    max-width:850px;
+    margin:0 auto 16px;
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    padding:0 4px;
+  }
+  .toolbar button{
+    background:var(--navy);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:6px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .toolbar button.secondary{
+    background:#fff;
+    color:var(--navy);
+    border:1px solid var(--navy);
+  }
+  .sheet{
+    max-width:850px;
+    margin:0 auto;
+    background:#fff;
+    box-shadow:0 4px 24px rgba(0,0,0,.12);
+    padding:36px 30px 30px;
+  }
+  .logo-row{ text-align:center; margin-bottom:18px; }
+  .logo-row svg{ height:38px; }
+  .accent-bar{ height:3px; background:var(--teal); margin-bottom:10px; }
+  .header-row{ display:flex; justify-content:space-between; align-items:flex-start; }
+  .company-name{ font-size:15px; font-weight:700; color:var(--navy); margin:0 0 6px; }
+  .company-details{ font-size:10.5px; color:var(--muted); line-height:1.6; }
+  .company-details .www{ font-style:italic; }
+  .invoice-title{ font-size:26px; font-weight:700; color:var(--navy); text-align:right; margin:0; }
+  .invoice-no-label{ font-size:10.5px; font-weight:700; color:var(--teal); text-align:right; margin-top:10px; }
+  .field-input{
+    border:1px solid #cbd5e1;
+    background:var(--yellow);
+    font-family:inherit;
+    font-size:12px;
+    padding:6px 8px;
+    width:100%;
+    border-radius:2px;
+  }
+  .field-input.white{ background:#fff; }
+  .field-input.right{ text-align:right; }
+  .invoice-no-input{ text-align:right; font-weight:600; color:var(--navy); }
+  .hr{ border:none; border-top:1px solid var(--lightline); margin:14px 0; }
+  .billto-grid{ display:flex; justify-content:space-between; gap:20px; margin-top:6px; }
+  .billto-left{ flex:1; }
+  .billto-right{ width:200px; }
+  .section-label{ font-size:10px; font-weight:700; color:var(--teal); margin-bottom:6px; letter-spacing:.3px; }
+  .billto-left .field-input{ margin-bottom:6px; }
+  .date-block{ margin-bottom:14px; }
+  .date-block .section-label{ text-align:right; }
+
+  .amount-due-box{
+    background:var(--navy);
+    color:#fff;
+    text-align:center;
+    padding:16px 10px 14px;
+    margin-top:14px;
+  }
+  .amount-due-box .lbl{ font-size:10px; font-weight:700; color:var(--teal); letter-spacing:.5px; }
+  .amount-due-box .val{ font-size:26px; font-weight:700; margin:6px 0 4px; }
+  .amount-due-box .note{ font-size:9.5px; font-style:italic; color:var(--lightblue); }
+
+  table.items{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:0;
+    font-size:11px;
+  }
+  table.items thead th{
+    background:var(--navy);
+    color:#fff;
+    font-size:9.5px;
+    font-weight:700;
+    padding:6px 4px;
+    text-align:center;
+    border:1px solid var(--navy);
+  }
+  table.items td{
+    border:1px solid #000;
+    padding:2px;
+    vertical-align:middle;
+  }
+  table.items select, table.items input{
+    width:100%;
+    border:none;
+    font-family:inherit;
+    font-size:10.5px;
+    padding:5px 3px;
+    background:transparent;
+  }
+  table.items select:focus, table.items input:focus{ background:#fffbe6; outline:1px solid var(--teal); }
+  .col-item{ width:19%; text-align:left; }
+  .col-year{ width:8%; }
+  .col-month{ width:10%; }
+  .col-notes{ width:17%; }
+  .col-qty{ width:7%; }
+  .col-currency{ width:11%; }
+  .col-amount{ width:12%; }
+  td.num input{ text-align:right; }
+  td.center select{ text-align:center; }
+
+  .subtotal-row{
+    display:flex;
+    justify-content:flex-end;
+    gap:16px;
+    align-items:center;
+    padding:8px 4px;
+    border-top:1px solid var(--lightline);
+    font-size:11px;
+    color:var(--muted);
+  }
+  .subtotal-row .amt{ width:100px; text-align:right; color:#1a2744; font-weight:600; }
+
+  .total-due-bar{
+    background:var(--navy);
+    color:#fff;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:16px;
+    padding:9px 10px;
+    font-size:12px;
+    font-weight:700;
+  }
+  .total-due-bar .amt{ width:100px; text-align:right; color:var(--teal); font-size:13px; }
+
+  .payment-header{
+    background:var(--navy2);
+    color:#fff;
+    font-size:10px;
+    font-weight:700;
+    padding:7px 10px;
+    margin-top:0;
+  }
+  table.payment{ width:100%; border-collapse:collapse; font-size:11px; }
+  table.payment td{ border:1px solid #000; padding:0; }
+  table.payment td.lbl{
+    background:var(--yellow);
+    font-weight:700;
+    color:var(--muted);
+    font-size:10px;
+    padding:6px 10px;
+    width:180px;
+  }
+  table.payment td.val input{
+    width:100%;
+    border:none;
+    font-family:inherit;
+    font-size:11px;
+    padding:6px 10px;
+  }
+  table.payment td.val input:focus{ background:#fffbe6; outline:none; }
+
+  .notes-section{ margin-top:14px; }
+  .notes-section .section-label{ margin-bottom:6px; }
+  .notes-text{ font-size:9.5px; color:var(--muted); border-top:1px solid var(--lightline); padding-top:8px; }
+
+  .footer-bar{
+    background:var(--navy);
+    color:var(--lightblue);
+    text-align:center;
+    font-size:9px;
+    font-style:italic;
+    padding:9px;
+    margin-top:16px;
+  }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .toolbar{ display:none; }
+    .sheet{ box-shadow:none; max-width:100%; padding:18px 22px; }
+    select, input{ border:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="secondary" id="resetBtn">重置 Reset</button>
+  <button id="printBtn">另存为 PDF / 打印</button>
+</div>
+
+<div class="sheet">
+
+  <div class="logo-row">
+    <svg viewBox="0 0 512 105" xmlns="http://www.w3.org/2000/svg" style="height:38px">
+      <g>
+        <polygon points="55,4 100,28 100,76 55,100 10,76 10,28" fill="#7fd6e0"/>
+        <polygon points="55,4 100,28 55,52 10,28" fill="#2ec4d6"/>
+        <polygon points="55,52 100,28 100,76 55,100" fill="#1a3362"/>
+        <polygon points="55,52 10,28 10,76 55,100" fill="#4fb8c9"/>
+      </g>
+      <text x="118" y="68" font-family="Arial, sans-serif" font-weight="700" font-size="46" fill="#1a3362">ThreeTrader</text>
+    </svg>
+  </div>
+
+  <div class="accent-bar"></div>
+
+  <div class="header-row">
+    <div>
+      <p class="company-name">ThreeTrader Global Limited</p>
+      <div class="company-details">
+        1276, Govant Building, Kumul Highway<br>
+        Port Vila, Republic of Vanuatu<br>
+        Tel: +61 2 8039 8119<br>
+        <span class="www">www.threetrader.com</span>
+      </div>
+    </div>
+    <div style="min-width:220px;">
+      <p class="invoice-title">INVOICE</p>
+      <div class="invoice-no-label">INVOICE NO.</div>
+      <input class="field-input invoice-no-input" id="invoiceNo" value="INV-XXX-MMYYYY">
+    </div>
+  </div>
+
+  <hr class="hr">
+
+  <div class="billto-grid">
+    <div class="billto-left">
+      <div class="section-label">BILL TO</div>
+      <input class="field-input" id="billName" placeholder="Your Name" value="Your Name" style="font-weight:700;">
+      <input class="field-input" id="billAddress" placeholder="Your Address" value="Your Address">
+      <input class="field-input" id="billEmail" placeholder="Your Email" value="Your Email">
+    </div>
+    <div class="billto-right">
+      <div class="date-block">
+        <div class="section-label">DATE ISSUED</div>
+        <input class="field-input right" id="dateIssued" type="text" placeholder="DD/MM/YYYY" value="DD/MM/YYYY">
+      </div>
+      <div class="date-block">
+        <div class="section-label">DUE DATE</div>
+        <input class="field-input right" id="dueDate" type="text" placeholder="DD/MM/YYYY" value="DD/MM/YYYY">
+      </div>
+    </div>
+  </div>
+
+  <div class="amount-due-box">
+    <div class="lbl">AMOUNT DUE</div>
+    <div class="val" id="amountDueDisplay">JPY 0.00</div>
+    <div class="note">Payment due upon receipt of invoice</div>
+  </div>
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th rowspan="2" class="col-item">ITERM</th>
+        <th colspan="3">DESCRIPTION</th>
+        <th rowspan="2" class="col-qty">QTY</th>
+        <th rowspan="2" class="col-currency">UNIT PRICE</th>
+        <th rowspan="2" class="col-amount">AMOUNT</th>
+      </tr>
+      <tr>
+        <th class="col-year">Year</th>
+        <th class="col-month">Month</th>
+        <th class="col-notes">NOTES</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody"></tbody>
+  </table>
+
+  <div class="subtotal-row">
+    <span>Subtotal</span>
+    <span class="amt" id="subtotalDisplay">0.00</span>
+  </div>
+
+  <div class="total-due-bar">
+    <span id="totalDueLabel">TOTAL DUE (JPY)</span>
+    <span class="amt" id="totalDueDisplay">0.00</span>
+  </div>
+
+  <div class="payment-header">PAYMENT DETAILS</div>
+  <table class="payment">
+    <tr><td class="lbl">Bank Name</td><td class="val"><input id="bankName"></td></tr>
+    <tr><td class="lbl">Swift / BIC Code</td><td class="val"><input id="swiftBic"></td></tr>
+    <tr><td class="lbl">IBAN / Account No.</td><td class="val"><input id="iban"></td></tr>
+    <tr><td class="lbl">Account Name</td><td class="val"><input id="accountName"></td></tr>
+    <tr><td class="lbl">Beneficiary Address</td><td class="val"><input id="beneficiaryAddress"></td></tr>
+  </table>
+
+  <div class="notes-section">
+    <div class="section-label">NOTES</div>
+    <div class="notes-text">This invoice may include a discretionary incentive for participation in the company's customer feedback / Google Review program, where applicable.</div>
+  </div>
+
+  <div class="footer-bar">ThreeTrader Global Limited &nbsp;&middot;&nbsp; Port Vila, Vanuatu &nbsp;&middot;&nbsp; www.threetrader.com</div>
+
+</div>
+
+<script>
+const ITEMS = ["", "Monthly Services Fee", "Additional Service Hours Fee", "Performance Incentive"];
+const YEARS = ["", "2026","2027","2028","2029","2030"];
+const MONTHS = ["", "January","February","March","April","May","June","July","August","September","October","November","December"];
+const CURRENCIES = ["", "USD","AUD","EUR","GBP","JPY","SGD","HKD","CNY","NZD"];
+const ROW_COUNT = 9;
+
+function opts(list, selected){
+  return list.map(v => `<option value="${v}" ${v===selected?'selected':''}>${v||'—'}</option>`).join('');
+}
+
+function buildRows(){
+  const body = document.getElementById('itemsBody');
+  let html = '';
+  for(let i=1;i<=ROW_COUNT;i++){
+    const itemDefault = i===1 ? "Monthly Services Fee" : "";
+    const yearDefault = i===1 ? "2026" : "";
+    const monthDefault = i===1 ? "January" : "";
+    const curDefault = i===1 ? "JPY" : "";
+    html += `<tr>
+      <td class="col-item"><select data-row="${i}" class="item-select">${opts(ITEMS, itemDefault)}</select></td>
+      <td class="col-year center"><select data-row="${i}" class="year-select">${opts(YEARS, yearDefault)}</select></td>
+      <td class="col-month center"><select data-row="${i}" class="month-select">${opts(MONTHS, monthDefault)}</select></td>
+      <td class="col-notes"><input type="text" data-row="${i}" class="notes-input"></td>
+      <td class="col-qty num"><input type="number" step="any" data-row="${i}" class="qty-input"></td>
+      <td class="col-currency center"><select data-row="${i}" class="currency-select">${opts(CURRENCIES, curDefault)}</select></td>
+      <td class="col-amount num"><input type="number" step="any" data-row="${i}" class="amount-input"></td>
+    </tr>`;
+  }
+  body.innerHTML = html;
+}
+buildRows();
+
+function fmtMoney(n){
+  n = parseFloat(n);
+  if(isNaN(n)) n = 0;
+  return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function recalc(){
+  let total = 0;
+  document.querySelectorAll('.amount-input').forEach(inp=>{
+    const v = parseFloat(inp.value);
+    if(!isNaN(v)) total += v;
+  });
+  const currencySelect = document.querySelector('.currency-select[data-row="1"]');
+  const currency = (currencySelect && currencySelect.value) ? currencySelect.value : 'JPY';
+
+  document.getElementById('subtotalDisplay').textContent = fmtMoney(total);
+  document.getElementById('totalDueDisplay').textContent = fmtMoney(total);
+  document.getElementById('totalDueLabel').textContent = `TOTAL DUE (${currency})`;
+  document.getElementById('amountDueDisplay').textContent = `${currency} ${fmtMoney(total)}`;
+}
+
+document.getElementById('itemsBody').addEventListener('input', recalc);
+document.getElementById('itemsBody').addEventListener('change', recalc);
+
+document.getElementById('printBtn').addEventListener('click', ()=> window.print());
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  if(confirm('确定要清空所有已填写的内容吗？')){
+    buildRows();
+    document.getElementById('invoiceNo').value = 'INV-XXX-MMYYYY';
+    document.getElementById('billName').value = 'Your Name';
+    document.getElementById('billAddress').value = 'Your Address';
+    document.getElementById('billEmail').value = 'Your Email';
+    document.getElementById('dateIssued').value = 'DD/MM/YYYY';
+    document.getElementById('dueDate').value = 'DD/MM/YYYY';
+    ['bankName','swiftBic','iban','accountName','beneficiaryAddress'].forEach(id=>document.getElementById(id).value='');
+    recalc();
+  }
+});
+
+recalc();
+</script>
+
+</body>
+</html>
