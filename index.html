@@ -229,8 +229,8 @@
 <body>
 
 <div class="toolbar">
-  <button class="secondary" id="resetBtn">重置 Reset</button>
-  <button id="printBtn">另存为 PDF / 打印</button>
+  <button class="secondary" id="resetBtn">Reset</button>
+  <button id="printBtn">Save as PDF / Print</button>
 </div>
 
 <div class="sheet">
@@ -333,7 +333,7 @@
 </div>
 
 <script>
-const ITEMS = ["", "Monthly Services Fee", "Additional Service Hours Fee", "Performance Incentive"];
+const ITEMS = ["", "Monthly Services Fee", "Additional Service Hours Fee", "Performance Incentive", "Expense Reimbursement", "Others"];
 const YEARS = ["", "2026","2027","2028","2029","2030"];
 const MONTHS = ["", "January","February","March","April","May","June","July","August","September","October","November","December"];
 const CURRENCIES = ["", "USD","AUD","EUR","GBP","JPY","SGD","HKD","CNY","NZD"];
@@ -404,7 +404,7 @@ document.getElementById('itemsBody').addEventListener('change', recalc);
 document.getElementById('printBtn').addEventListener('click', ()=> window.print());
 
 document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(confirm('确定要清空所有已填写的内容吗？')){
+  if(confirm('Are you sure you want to clear all entered content?')){
     buildRows();
     document.getElementById('invoiceNo').value = 'INV-XXX-MMYYYY';
     document.getElementById('billName').value = 'Your Name';
